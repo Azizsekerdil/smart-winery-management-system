@@ -1,0 +1,25 @@
+# Satır sonlarını depoda LF olarak normalleştir; Windows'ta çalışma kopyasında
+# CRLF kullanılabilir. Bu, ekip üyeleri farklı işletim sistemlerinde çalıştığında
+# sahte diff'leri önler.
+* text=auto eol=lf
+
+# Windows'ta CRLF ile çalışması gereken dosyalar
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# İkili dosyalar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.xlsx binary
+*.db binary
+*.gguf binary
+*.safetensors binary
+
+# GitHub dil istatistiklerinde üretilen/satıcı dosyaları sayılmasın
+backend/alembic/versions/* linguist-generated=true
+frontend/package-lock.json linguist-generated=true

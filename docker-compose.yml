@@ -1,0 +1,108 @@
+# Akıllı Şaraphane Yönetim Sistemi — konteyner düzeni
+#
+# Windows üzerinde birincil çalıştırma yöntemi `Baslat.bat`tır; bu dosya
+# sunucuya kurulum (üretim) veya izole test için sağlanmıştır.
+#
+# Kullanım:
+#   copy .env.example .env      → değerleri doldurun (özellikle PAROLA ve anahtarlar)
+#   docker compose up -d --build
+#   docker compose exec backend alembic upgrade head
+#
+# NOT: `.env` dosyası Git'e GİRMEZ. Parolayı bu dosyaya yazmayın.
+
+name: saraphane
+
+services:
+  # --------------------------------------------------------------- veritabanı
+  db:
+    image: postgres:17-alpine
+    container_name: saraphane-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-saraphane}
+      POSTGRES_USER: ${POSTGRES_USER:-saraphane}
+      # ZORUNLU: .env içinde tanımlayın. Varsayılan parola bilinçli olarak YOKTUR.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD .env dosyasinda tanimlanmalidir}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - db_verisi:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-saraphane} -d ${POSTGRES_DB:-saraphane}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    # Veritabanı yalnızca iç ağa açıktır; dışarıya port YAYINLANMAZ.
+    expose:
+      - "5432"
+    networks: [ic_ag]
+
+  # ------------------------------------------------------------------ backend
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: saraphane-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      HOST: 0.0.0.0
+      PORT: "8010"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-saraphane}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-saraphane}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY .env dosyasinda tanimlanmalidir}
+      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY:?SECRETS_ENCRYPTION_KEY .env dosyasinda tanimlanmalidir}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      SEED_DEMO_DATA: "false"
+      # AI terminali konteynerde varsayılan olarak KAPALIDIR (Git ve çalışma
+      # alanı erişimi konteyner içinde anlamlı değildir).
+      AGENT_ENABLED: "false"
+      # Konteynerden ana makinedeki LM Studio'ya erişim
+      LMSTUDIO_BASE_URL: ${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
+      LMSTUDIO_MODEL: ${LMSTUDIO_MODEL:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
+      LOG_JSON: "true"
+    volumes:
+      - yuklemeler:/uygulama/data/uploads
+      - yedekler:/uygulama/data/backups
+      - gunlukler:/uygulama/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - "8010"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=5).status == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks: [ic_ag]
+
+  # ----------------------------------------------------------------- frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: saraphane-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Üretimde bunu bir ters vekil (TLS sonlandırmalı) arkasına alın.
+      - "${WEB_PORT:-8080}:80"
+    networks: [ic_ag]
+
+volumes:
+  db_verisi:
+  yuklemeler:
+  yedekler:
+  gunlukler:
+
+networks:
+  ic_ag:
+    driver: bridge

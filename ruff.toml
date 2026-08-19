@@ -1,0 +1,61 @@
+# Proje genelinde kod kalitesi kurallari.
+# Kok dizinde tutulur ki `ruff check backend tests` tek yapilandirmayla calissin.
+
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "node_modules", "backend/alembic/versions", "__pycache__", "data", "logs"]
+
+[lint]
+select = [
+    "E",     # pycodestyle
+    "F",     # pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # bugbear
+    "C4",    # comprehensions
+    "SIM",   # sadelestirme
+    "RUF",   # ruff kurallari
+    "S",     # bandit (guvenlik)
+    "ASYNC", # asenkron tuzaklari
+]
+ignore = [
+    "E501",   # satir uzunlugu: uzun Turkce mesajlar icin esnek birakildi
+    "B008",   # FastAPI'de Depends()/Query() varsayilan deger olarak kullanilir
+    "RUF001", # Turkce karakterler "belirsiz" olarak isaretleniyor
+    "RUF002",
+    "RUF003",
+    "RUF012", # ClassVar zorunlulugu (SQLAlchemy modelleriyle catisiyor)
+]
+
+[lint.per-file-ignores]
+"tests/*" = [
+    "S",       # testlerde sabit parola/assert kullanimi normaldir
+    "ASYNC",   # test yardimcilarinda pathlib kullanimi kabul edilir
+    "F403",    # `from app.models import *` tablolarin kaydi icin gerekli
+    "F405",
+    "E402",    # ortam degiskenleri ithalattan once ayarlanir (conftest)
+]
+"backend/app/db/seed.py" = ["S311", "E501"]        # demo verisi icin random yeterli
+"backend/app/services/ai_features.py" = ["S311"]
+# `timeout` parametresi ALT SURECE uygulanir (cagirana degil); ASYNC109 burada gecersiz.
+"backend/app/agent/executor.py" = ["S603", "ASYNC109"]
+# S105: "bearer" / "access" gibi degerler belirtec TURU ve sema adidir, gizli deger degil.
+"backend/app/core/security.py" = ["S105"]
+"backend/app/schemas/auth.py" = ["S105"]
+"backend/app/agent/git_ops.py" = ["S603", "S607"]
+"backend/app/main.py" = ["F403", "F405"]
+"backend/app/db/init_db.py" = ["F403", "F405"]
+"backend/app/models/__init__.py" = ["F401"]
+"backend/app/services/ai/__init__.py" = ["F401"]
+# Tek seferlik CLI betikleri: senkron dosya yazimi kabul edilir (olay dongusunu
+# meshgul etmesi onemsiz, ek bagimlilik eklemeye degmez).
+# S603/S607: `git` sabit argumanlarla ve kabuk KULLANILMADAN cagrilir; kullanici
+# girdisi komuta gecmez.
+"scripts/*.py" = ["ASYNC240", "E402", "S603", "S607"]
+
+[lint.isort]
+known-first-party = ["app", "tests"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

@@ -1,0 +1,241 @@
+@import 'tailwindcss';
+
+/*
+  Şaraphane kimliği: bordo (şarap), koyu üzüm, krem ve bakır.
+  Renkler CSS değişkeni olarak tanımlanır; koyu/açık tema tek yerden yönetilir.
+*/
+
+@theme {
+  --font-sans:
+    'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Bordo (ana marka) */
+  --color-bordo-50: #fdf3f5;
+  --color-bordo-100: #fbe4e9;
+  --color-bordo-200: #f6ccd6;
+  --color-bordo-300: #eea4b7;
+  --color-bordo-400: #e17091;
+  --color-bordo-500: #d0446f;
+  --color-bordo-600: #b52a57;
+  --color-bordo-700: #971f48;
+  --color-bordo-800: #7e1d40;
+  --color-bordo-900: #5c1a2b;
+  --color-bordo-950: #3b0a14;
+
+  /* Koyu üzüm (mor) */
+  --color-uzum-50: #f6f4fb;
+  --color-uzum-100: #edeaf7;
+  --color-uzum-200: #ded8f0;
+  --color-uzum-300: #c6bae4;
+  --color-uzum-400: #a894d4;
+  --color-uzum-500: #8d70c3;
+  --color-uzum-600: #7a56b2;
+  --color-uzum-700: #67459c;
+  --color-uzum-800: #553b7f;
+  --color-uzum-900: #2e1c46;
+  --color-uzum-950: #1c1029;
+
+  /* Bakır (vurgu) */
+  --color-bakir-50: #fdf6ef;
+  --color-bakir-100: #f9e9d7;
+  --color-bakir-200: #f2d0ae;
+  --color-bakir-300: #e8ae7b;
+  --color-bakir-400: #dd8546;
+  --color-bakir-500: #d46a28;
+  --color-bakir-600: #b8511e;
+  --color-bakir-700: #993d1c;
+  --color-bakir-800: #7c321e;
+  --color-bakir-900: #652b1b;
+
+  /* Krem (nötr sıcak) */
+  --color-krem-50: #fdfbf7;
+  --color-krem-100: #f8f3e9;
+  --color-krem-200: #f0e6d4;
+  --color-krem-300: #e3d3b6;
+  --color-krem-400: #d0b98f;
+  --color-krem-500: #bda071;
+}
+
+/* --- Tema değişkenleri --------------------------------------------------- */
+:root {
+  --yuzey: #fdfbf7;
+  --yuzey-2: #ffffff;
+  --yuzey-3: #f4efe6;
+  --kenar: #e5dcce;
+  --metin: #2a1f24;
+  --metin-2: #6b5c62;
+  --vurgu: #971f48;
+  --vurgu-yazi: #ffffff;
+  --golge: 0 1px 3px rgb(59 10 20 / 0.08), 0 1px 2px rgb(59 10 20 / 0.04);
+}
+
+.dark {
+  --yuzey: #171014;
+  --yuzey-2: #201822;
+  --yuzey-3: #2b2130;
+  --kenar: #3a2e3f;
+  --metin: #f3ece9;
+  --metin-2: #a99aa4;
+  --vurgu: #e17091;
+  --vurgu-yazi: #2a0a15;
+  --golge: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.35);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--yuzey);
+    color: var(--metin);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--kenar) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--kenar);
+    border-radius: 6px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--vurgu);
+    outline-offset: 2px;
+  }
+}
+
+/* --- Yeniden kullanılan bileşen sınıfları -------------------------------- */
+@layer components {
+  .kart {
+    background: var(--yuzey-2);
+    border: 1px solid var(--kenar);
+    border-radius: 0.75rem;
+    box-shadow: var(--golge);
+  }
+
+  .girdi {
+    width: 100%;
+    background: var(--yuzey);
+    border: 1px solid var(--kenar);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--metin);
+    transition: border-color 0.15s ease;
+  }
+  .girdi:focus {
+    border-color: var(--vurgu);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--vurgu) 18%, transparent);
+  }
+  .girdi:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .dugme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .dugme:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .dugme-birincil {
+    background: var(--vurgu);
+    color: var(--vurgu-yazi);
+  }
+  .dugme-birincil:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+  .dugme-ikincil {
+    background: var(--yuzey-3);
+    color: var(--metin);
+    border: 1px solid var(--kenar);
+  }
+  .dugme-ikincil:hover:not(:disabled) {
+    background: var(--kenar);
+  }
+  .dugme-tehlike {
+    background: #b91c1c;
+    color: #fff;
+  }
+  .dugme-tehlike:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
+  .rozet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .tablo {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .tablo th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--metin-2);
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--kenar);
+    background: var(--yuzey-3);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .tablo td {
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--kenar);
+  }
+  .tablo tbody tr:hover {
+    background: color-mix(in oklab, var(--vurgu) 6%, transparent);
+  }
+}
+
+@keyframes kayarak-gir {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animasyon-gir {
+  animation: kayarak-gir 0.2s ease-out;
+}
+
+@media print {
+  .yazdirma-gizle {
+    display: none !important;
+  }
+}

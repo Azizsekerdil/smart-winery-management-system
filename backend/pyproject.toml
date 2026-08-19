@@ -1,0 +1,51 @@
+[project]
+name = "saraphane-backend"
+version = "0.1.0"
+description = "Akıllı Şaraphane Yönetim Sistemi — backend"
+requires-python = ">=3.12"
+
+# NOT: Proje lisansı henüz belirlenmemiştir (bkz. README → Lisans).
+# Kullanıcı karar verene kadar bilinçli olarak lisans alanı eklenmemiştir.
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+# NOT: Ruff yapılandırması kök dizindeki `ruff.toml` dosyasındadır; böylece
+# `ruff check backend tests` tek ayar kümesiyle çalışır.
+
+# --------------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+plugins = []
+ignore_missing_imports = true
+warn_unused_configs = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+exclude = ["alembic/versions/.*", "\\.venv"]
+
+[[tool.mypy.overrides]]
+module = ["qrcode.*", "reportlab.*", "openpyxl.*"]
+ignore_errors = true
+
+# Genel CRUD fabrikası, uç noktaları ÇALIŞMA ZAMANINDA üretir: şema sınıfları
+# fonksiyon parametresi olarak gelir ve statik olarak tip adı gibi kullanılamaz.
+# FastAPI bunu çalışma zamanında doğru çözer (bkz. app/api/crud.py başlığı);
+# mypy'nin statik modeli bu deseni ifade edemediği için yalnızca bu modül muaftır.
+[[tool.mypy.overrides]]
+module = ["app.api.crud"]
+disable_error_code = ["valid-type", "attr-defined", "arg-type"]
+
+# ------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["../tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-q --strict-markers"
+filterwarnings = [
+    "ignore::DeprecationWarning:passlib.*",
+]

@@ -1,0 +1,140 @@
+# =============================================================================
+#  Akıllı Şaraphane Yönetim Sistemi — Git yok sayma kuralları
+#  İlke: gizli bilgi, kullanıcı verisi ve üretilen dosyalar depoya GİRMEZ.
+# =============================================================================
+
+# ------------------------------------------------------- GİZLİ BİLGİ (kritik)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+id_rsa*
+*.crt
+secrets.json
+credentials.json
+.secrets/
+*.token
+# Uygulamanin `.env` verilmediginde kendi urettigi kalici gizli anahtarlar.
+# Veritabanindaki API anahtarlarinin sifrelemesi buna baglidir; asla paylasilmaz.
+gizli-anahtarlar.json
+data/gizli-anahtarlar.json
+# Ilk kurulumda uretilen yonetici parolasi (bir kez gosterilir, sonra silinir).
+ILK-GIRIS.txt
+data/ILK-GIRIS.txt
+
+# ---------------------------------------------------------------- Veritabanı
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/*.db
+data/backups/
+dump.rdb
+
+# --------------------------------------------------- Kullanıcı verisi / yükler
+data/uploads/
+data/exports/
+!data/.gitkeep
+uploads/
+
+# --------------------------------------------------------------- Günlükler
+logs/
+*.log
+*.log.*
+
+# ------------------------------------------------------------ Model dosyaları
+# DIKKAT: Bu kural ANCAK depo kokundeki `/models/` dizinini kapsar.
+# Cipasiz `models/` yazilirsa `backend/app/models/` (SQLAlchemy ORM katmani) da
+# yok sayilir ve yayinlanan agac CALISMAZ - uygulama ice aktarilamaz.
+/models/
+!/models/.gitkeep
+*.gguf
+*.safetensors
+*.bin
+*.onnx
+*.pt
+*.pth
+
+# ------------------------------------------------------------------- Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib60/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+.hypothesis/
+
+# --------------------------------------------------------------- Node / Vite
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/node_modules/
+.npm
+.eslintcache
+*.tsbuildinfo
+
+# ------------------------------------------------------------ Playwright E2E
+# Koşu çıktıları (izleme, ekran görüntüsü, HTML rapor). Belge görselleri
+# `docs/screenshots/` altındadır ve BİLEREK depoya dahil edilir.
+frontend/.playwright/
+frontend/e2e/.sonuclar/
+frontend/e2e/.rapor/
+frontend/test-results/
+frontend/playwright-report/
+
+# ---------------------------------------------------------------- Editör/IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------- Geçici
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# ---------------------------------------------------------------- Windows
+*.exe
+*.msi
+!scripts/*.bat
+dist-installer/

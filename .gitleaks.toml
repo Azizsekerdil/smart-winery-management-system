@@ -1,0 +1,42 @@
+# Gitleaks yapılandırması.
+#
+# İLKE: Bu dosya bir gizli değeri gizlemek için DEĞİL, güvenlik testlerinin
+# içindeki KURGUSAL örnek anahtarların taramayı gürültüye boğmasını önlemek
+# için vardır. Hiçbir gerçek kimlik bilgisi burada muaf tutulmamıştır.
+#
+# Muaf tutulan satırlar, "gizli değerler maskeleniyor mu?" sorusunu sınayan
+# testlerin GİRDİLERİDİR. Bu girdiler olmadan testler anlamsız hâle gelir;
+# bu yüzden testler zayıflatılmak yerine tarayıcıya bağlam verilmiştir.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+[rules.allowlist]
+paths = [
+  # Maskeleme testinin ornek anahtar tablosu. Icindekilerin tamami acikca
+  # kurgusaldir: `0123456789abcdefghijklmnopqrstuvwxyz` dizileri,
+  # AWS'nin kendi belgelerindeki `AKIAIOSFODNN7EXAMPLE` ornegi ve
+  # jwt.io'nun ornek belirteci. Hicbiri bir servise karsi gecerli degildir.
+  '''tests/test_security_masking\.py''',
+  # `SECRET_KEY` acikca verildiginde kalici dosyaya bakilmadigini dogrular.
+  # Deger, Turkce "acikca verilmis deger" ifadesinin kendisidir.
+  '''tests/test_gizli_kaliciligi\.py''',
+]
+
+[[rules]]
+id = "jwt"
+[rules.allowlist]
+paths = [
+  '''tests/test_security_masking\.py''',
+]
+
+[allowlist]
+description = "Sablon dosyalari ve uretilen ciktilar"
+paths = [
+  # Yalnizca BOS degerler icerir; bkz. dosyanin kendisi.
+  '''\.env\.example''',
+  # Syft ciktisi: bagimlilik adlari ve saglama toplamlari, gizli deger degil.
+  '''sbom\.(spdx|cdx)\.json''',
+]

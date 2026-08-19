@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Akilli Saraphane Yonetim Sistemi — MSI kurulum paketi (WiX Toolset v5).
+
+  Uretim:  powershell -ExecutionPolicy Bypass -File scripts\msi-paketle.ps1
+
+  NOT 1 — Ad alani: WiX v5 kaynak dosyalari HALA ".../v4/wxs" ad alanini
+  kullanir. "v5" diye bir ad alani yoktur.
+
+  NOT 2 — Surum ve kaynak dizini derleme sirasinda -d ile verilir:
+      -d Surum=0.1.0 -d KaynakDizin=...\dist\Saraphane
+
+  NOT 3 — UpgradeCode SABITTIR. Degistirilirse yeni surum, eskisini yukseltme
+  olarak taniyamaz; iki kopya yan yana kurulur. ASLA degistirmeyin.
+
+  NOT 4 — Kullanici verisi (veritabani, gunlukler, yuklemeler) bu pakete DAHIL
+  DEGILDIR ve kurulum dizinine yazilmaz. Uygulama, kurulum dizini yazilamaz
+  oldugunda veriyi %LOCALAPPDATA%\Saraphane altina alir (bkz. app/core/config.py).
+  Boylece kaldirma ve onarim islemleri kullanici verisine dokunmaz.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package
+      Name="Akıllı Şaraphane Yönetim Sistemi"
+      Manufacturer="Şaraphane"
+      Version="$(var.Surum)"
+      UpgradeCode="685DB88C-326E-4BFA-A29F-0374A84BFBDA"
+      Scope="perMachine"
+      Compressed="yes"
+      Codepage="65001"
+      Language="1055">
+
+    <SummaryInformation
+        Description="Akıllı Şaraphane Yönetim Sistemi kurulum paketi"
+        Manufacturer="Şaraphane" />
+
+    <!-- Ayni veya daha yeni surum kuruluysa uyar; eskiyi sessizce yukselt. -->
+    <MajorUpgrade
+        AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="Bilgisayarınızda [ProductName] uygulamasının daha yeni bir sürümü kurulu. Kurulum durduruldu." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Programlar ve Özellikler girdisi: onarim/degistirme sunulmaz. -->
+    <Property Id="ARPNOREPAIR" Value="1" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPPRODUCTICON" Value="SaraphaneSimge" />
+    <Icon Id="SaraphaneSimge" SourceFile="$(var.SimgeDosyasi)" />
+
+    <!-- C:\Program Files\Saraphane -->
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="Saraphane" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="BaslatMenuKlasoru" Name="Şaraphane" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Feature Id="Ana" Title="Şaraphane" Level="1">
+      <ComponentGroupRef Id="UygulamaDosyalari" />
+      <ComponentRef Id="BaslatMenuKisayolu" />
+      <ComponentRef Id="MasaustuKisayolu" />
+    </Feature>
+
+    <!-- PyInstaller tek klasor (onedir) agacinin tamami. <Files> WiX Core'un
+         parcasidir; ayri bir harvest adimi veya Util eklentisi gerekmez. -->
+    <ComponentGroup Id="UygulamaDosyalari" Directory="INSTALLFOLDER">
+      <Files Include="$(var.KaynakDizin)\**" />
+    </ComponentGroup>
+
+    <Component Id="BaslatMenuKisayolu" Directory="BaslatMenuKlasoru" Guid="*">
+      <Shortcut Id="BaslatKisayol"
+                Name="Akıllı Şaraphane Yönetim Sistemi"
+                Description="Bağdan şişeye şaraphane yönetimi"
+                Target="[INSTALLFOLDER]Saraphane.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="SaraphaneSimge" />
+      <RemoveFolder Id="BaslatMenuKlasoruSil" Directory="BaslatMenuKlasoru" On="uninstall" />
+      <RegistryValue Root="HKLM" Key="Software\Saraphane"
+                     Name="BaslatMenuKisayolu" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <Component Id="MasaustuKisayolu" Directory="DesktopFolder" Guid="*">
+      <Shortcut Id="MasaustuKisayol"
+                Name="Akıllı Şaraphane Yönetim Sistemi"
+                Description="Bağdan şişeye şaraphane yönetimi"
+                Target="[INSTALLFOLDER]Saraphane.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="SaraphaneSimge" />
+      <RegistryValue Root="HKLM" Key="Software\Saraphane"
+                     Name="MasaustuKisayolu" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+  </Package>
+</Wix>
